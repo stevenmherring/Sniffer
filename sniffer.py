@@ -134,6 +134,7 @@ def parse_tcp(packet, ipheader_length, fd):
     #we need to check out_data for HTTP or DNS payloads.
     #Look for "HTTP/1.x" for HTTP
     #content-length: field will give the total size of the packet. (useful but not necessary)
+    #Refere to RFC 2616 for reconstruction of HTTP 
     out_data = pack[header_size:]
     if "HTTP/1." in out_data: #this condition isn't good enough to use, needs to be more exclusive
         parse_http(packet, out_data, fd)
