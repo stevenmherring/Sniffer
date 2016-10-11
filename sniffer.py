@@ -130,10 +130,16 @@ def parse_tcp(packet, ipheader_length, fd):
 
     header_size = ETHERNET_LENGTH + ipheader_length + header_length * 4
     #print and write packet data
+    #--TODO-
+    #we need to check out_data for HTTP or DNS payloads.
+    #Look for "HTTP/1.x" for HTTP
+    #content-length: field will give the total size of the packet. (useful but not necessary)
     out_data = pack[header_size:]
-    print " Data: " + out_data
-    fd.write(out_data)
-
+    if "HTTP/1." in out_data: #this condition isn't good enough to use, needs to be more exclusive
+        parse_http(packet, out_data, fd)
+    else
+        print " Data: " + out_data
+        fd.write(out_data)
     return
 
 def parse_udp(packet, ipheader_length, fd):
@@ -168,9 +174,9 @@ def parse_udp(packet, ipheader_length, fd):
     fd.write(out_data)
     return
 
-def parse_http():
+def parse_http(packet, data, fd):
 
-def parse_dns():
+def parse_dns(packet, data, fd):
 
 
 def main():
