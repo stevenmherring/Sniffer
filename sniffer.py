@@ -123,9 +123,17 @@ def parse_tcp(packet, ipheader_length, fd):
     seq_number = header[2]
     ack_number = header[3]
     header_length = header[4] >> 4
+    #print and write packet details
     out_data = "Source Port: " + str(src_port) + " Destination Port: " + str(dest_port) + " Sequence Number: " + str(seq_number) + " Acknowledgment Number: " + str(ack_number) + " TCP Length: " + strheader_length)
     print out_data
     fd.write(out_data)
+
+    header_size = ETHERNET_LENGTH + ipheader_length + header_length * 4
+    #print and write packet data
+    out_data = pack[header_size:]
+    print " Data: " + out_data
+    fd.write(out_data)
+
     return
 
 def parse_udp(packet, ipheader_length, fd):
@@ -148,8 +156,15 @@ def parse_udp(packet, ipheader_length, fd):
     dest_port = header[1]
     length = header[2]
     checksum = header[3]
+    #print and write packet details
     out_data = "Source Port: " + str(src_port) + " Destination Port: " + str(dest_port) + " Length: " + str(header_length) + " Checksum: " + str(checksum)
     print out_data
+    fd.write(out_data)
+
+    header_size = ETHERNET_LENGTH + ipheader_length + header_length
+    #print and write packet data
+    out_data = pack[header_size:]
+    print " Data: " + out_data
     fd.write(out_data)
     return
 
