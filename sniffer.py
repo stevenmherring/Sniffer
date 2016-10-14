@@ -1,5 +1,6 @@
 import sys
 import socket
+import os
 import getopt
 from struct import *
 import time
@@ -18,6 +19,8 @@ err_fopen_failure = "Failed to open file"
 IP_PACKET_ID = 8
 TCP_PROTOCOL_ID = 6
 UDP_PROTOCOL_ID = 17
+
+#Static Packet Lengths
 ETHERNET_LENGTH = 14
 
 #globals
@@ -25,7 +28,7 @@ reconstruct = False
 outfile = "dump.log"
 search = ""
 period = 10
-device = ""
+device = "" #remove, we can just sniff everything
 packet_number = 0
 
 def usage ():
@@ -38,7 +41,7 @@ def usage ():
     print "-t time      - Time to parse in s. Default 10s"
     print "-r           - Reconstruct HTTP and DNS packets"
     print "-h           - Print usage"
-    print "-d device    - Define device to sniff, default is en0"
+    print "-d device    - **UNSUPPORTED** Define device to sniff, default is en0"
     print "-s term      - Search outfile for term or regex"
     sys.exit(0)
 
@@ -131,7 +134,7 @@ def parse_tcp(packet, ipheader_length, fd):
     header_size = ETHERNET_LENGTH + ipheader_length + header_length * 4
     #print and write packet data
     #--TODO-
-    #we need to check out_data for HTTP or DNS payloads.
+    #we need to check out_data for HTTP payloads.
     #Look for "HTTP/1.x" for HTTP
     #content-length: field will give the total size of the packet. (useful but not necessary)
     #Refere to RFC 2616 for reconstruction of HTTP
@@ -212,6 +215,8 @@ def main():
         elif o in ("-s", "--search"):
             search = a
         elif o in ("-d", "--device"):
+            print "Device support not implemented"
+            break
             devices = pcapy.findalldevs()
             if a in devices:
                 device = a
@@ -223,7 +228,24 @@ def main():
 
     try:
         #s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP)
-        socket = socket.socket(socket.AF_PACKET , socket.SOCK_RAW , socket.ntohs(0x0003))
+        #if windows, protocol is IP, unix ICMP
+        if os.name == "nt":
+            socket_protocol = socket.IPPROTO_IP
+        else:
+            socket_protocol = socket.IPPROTO_ICMP
+        #still unsure if this is the correct socket configuration, as I can't test yet
+        #need to get some time to a windows/linux box to test everything, but my research suggests
+        #this is correct.
+        #sniffSocket = socket.socket(socket.AF_PACKET , socket.SOCK_RAW , socket.ntohs(0x0003))
+        sniffSocket = socket.socket(socket.AF_INET , socket.SOCK_RAW , socket_protocol)
+        #bind bind all sockets
+        sniffSocket.bind(("",0))
+        #include IP headers, unsure if necessary ATM
+        sniffSocket.setsockopt(socket.IPPOTO_IP, socket.IP_HDRINCL, 1)
+
+        #if windows, enable promiscuous
+        if os.name == "nt":
+            sniffSocket.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
     except socket.error as err:
         print err_socket_failure
         print str(err)
@@ -239,12 +261,12 @@ def main():
     while True:
         if time.time() > stoptime # if we ran past provided time
             break
-        packet = socket.recvfrom(65535) #receive packet
+        packet = sniffSocket.recvfrom(65565) #receive packet
         packet = packet[0] #pull packet from tuple
         #parse & unpack header, addresses from packet
         ethernet_header = packet[:ETHERNET_LENGTH]
         ethernet = unpack("!6s6sH" , ethernet_header) #splits into 6 char string, 6 char string, 2byte int
-        ethernet_protocol = socket.ntohs(ethernet[2]) #last element is out protocol ID
+        ethernet_protocol = sniffSocket.ntohs(ethernet[2]) #last element is out protocol ID
         print "Dest MAC address: " + ethernet_address(packet[0:6]) + " Source MAC address: " + ethernet_address(packet[6:12]) + " Protocol type: " + str(ethernet_protocol))
 
         #Parse packets by type, IP first, what we really are looking for
@@ -253,6 +275,9 @@ def main():
 
         else:
             print "uhhhh not here yet"
+    #if windows, disable promiscuous
+    if os.name == "nt":
+        sniffSocket.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF)
 
 
 
