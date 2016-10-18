@@ -15,6 +15,7 @@ usecase = "Sniff, log, parse and search packets during a given period of time"
 #string usage
 err_socket_failure = "Failure to create or use socket"
 err_fopen_failure = "Failed to open file"
+err_parsing = "Parsing Failure Please refer to STDOUT/STDERR"
 
 #globals
 reconstruct = False
@@ -115,7 +116,10 @@ def main():
             break
         packet = sniffSocket.recvfrom(65565) #receive packet
         packet = packet[0] #pull packet from tuple
-        parseTools.init_packet_parse(packet, f)
+        if(parseTools.init_packet_parse(packet, f) == False):
+            #we returned false through an error, break and terminate gracefully
+            print err_parsing
+            break
     #if windows, disable promiscuous
     if os.name == WINDOWS_NAME:
         sniffSocket.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF)

@@ -20,10 +20,11 @@ def init_packet_parse(packet, fd):
 
     #Parse packets by type, IP first, what we really are looking for
     if ethernet_protocol == IP_PACKET_ID:
-        parse_ip_packet(packet, ETHERNET_LENGTH, fd)
-
+        if(parse_ip_packet(packet, ETHERNET_LENGTH, fd) == False):
+            return False
     else:
         print "uhhhh not here yet"
+    return True
 def parse_ip_packet(packet, ethernet_length, fd):
     #parse header
     ipheader = packet[ethernet_length:ethernet_length+20] #extract 20 byte IP header
@@ -59,16 +60,22 @@ def parse_ip_packet(packet, ethernet_length, fd):
     out_data = "Packet Number: " + packet_number + " Version: " + str(version) + " IHL: " + str(ihl) + " TTL: " + str(ttl) + " Protocol: " + str(protocol) + " Source Address: " + str(src_address) + " Destination Address: " + str(dst_address)
     packet_number++
     print out_data
-    fd.write(out_data)
-
+    try:
+        fd.write(out_data)
+    except IOError as err:
+        print err
+        return False
     ipheader_length = ihl * 4
     #check if tcp/udp/http/dns
     if protocol == TCP_PROTOCOL_ID:
-        parse_tcp(packet, ipheader_length, fd)
+        if(parse_tcp(packet, ipheader_length, fd) == False):
+            return False
     elif protocol = UDP_PROTOCOL_ID:
-        parse_udp(packet, ipheader_length, fd)
+        if(parse_udp(packet, ipheader_length, fd) == False):
+            return False
     else:
         #other packet types
+    return True
 
 def parse_tcp(packet, ipheader_length, fd):
     #parse header
@@ -103,8 +110,11 @@ def parse_tcp(packet, ipheader_length, fd):
     #print and write packet details
     out_data = "Source Port: " + str(src_port) + " Destination Port: " + str(dest_port) + " Sequence Number: " + str(seq_number) + " Acknowledgment Number: " + str(ack_number) + " TCP Length: " + strheader_length)
     print out_data
-    fd.write(out_data)
-
+    try:
+        fd.write(out_data)
+    except IOError as err:
+        print err
+        return False
     header_size = ETHERNET_LENGTH + ipheader_length + header_length * 4
     #print and write packet data
     #--TODO-
@@ -114,11 +124,16 @@ def parse_tcp(packet, ipheader_length, fd):
     #Refere to RFC 2616 for reconstruction of HTTP
     out_data = pack[header_size:]
     if "HTTP/1." in out_data: #this condition isn't good enough to use, needs to be more exclusive
-        parse_http(packet, out_data, fd)
-    else
+        if(parse_http(packet, out_data, fd) == False):
+            return False
+    else:
         print " Data: " + out_data
-        fd.write(out_data)
-    return
+        try:
+            fd.write(out_data)
+        except IOError as err:
+            print err
+            return False
+    return True
 
 def parse_udp(packet, ipheader_length, fd):
     start = ipheader_length + ETHERNET_LENGTH
@@ -143,8 +158,11 @@ def parse_udp(packet, ipheader_length, fd):
     #print and write packet details
     out_data = "Source Port: " + str(src_port) + " Destination Port: " + str(dest_port) + " Length: " + str(header_length) + " Checksum: " + str(checksum)
     print out_data
-    fd.write(out_data)
-
+    try:
+        fd.write(out_data)
+    except IOError as err:
+        print err
+        return False
     header_size = ETHERNET_LENGTH + ipheader_length + header_length
     #TODO
     #need to check if packet contains DNS data
@@ -152,9 +170,24 @@ def parse_udp(packet, ipheader_length, fd):
     #print and write packet data
     out_data = pack[header_size:]
     print " Data: " + out_data
-    fd.write(out_data)
-    return
+    try:
+        fd.write(out_data)
+    except IOError as err:
+        print err
+        return False
+    return True
 
 def parse_http(packet, data, fd):
+    #split raw http by :
+    http_data = dict(s.split(":") for s in http_data)
+    print http_data
+    try:
+        #insert back the : and separate each header to its own line
+        for key, value in http_data.iteritems():
+            fd.write(key + ": " + value)
+    except IOError as err:
+        print err
+        return False
+    return True
 
 def parse_dns(packet, data, fd):
