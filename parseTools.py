@@ -63,7 +63,7 @@ def parse_ip_packet(packet, ethernet_length, fd):
     try:
         fd.write(out_data)
     except IOError as err:
-        print err
+        print str(err)
         return False
     ipheader_length = ihl * 4
     #check if tcp/udp/http/dns
@@ -113,7 +113,7 @@ def parse_tcp(packet, ipheader_length, fd):
     try:
         fd.write(out_data)
     except IOError as err:
-        print err
+        print str(err)
         return False
     header_size = ETHERNET_LENGTH + ipheader_length + header_length * 4
     #print and write packet data
@@ -131,7 +131,7 @@ def parse_tcp(packet, ipheader_length, fd):
         try:
             fd.write(out_data)
         except IOError as err:
-            print err
+            print str(err)
             return False
     return True
 
@@ -161,7 +161,7 @@ def parse_udp(packet, ipheader_length, fd):
     try:
         fd.write(out_data)
     except IOError as err:
-        print err
+        print str(err)
         return False
     header_size = ETHERNET_LENGTH + ipheader_length + header_length
     #TODO
@@ -173,20 +173,22 @@ def parse_udp(packet, ipheader_length, fd):
     try:
         fd.write(out_data)
     except IOError as err:
-        print err
+        print str(err)
         return False
     return True
 
 def parse_http(packet, data, fd):
     #split raw http by :
-    http_data = dict(s.split(":") for s in http_data)
+    http_data_list = data.split("\r\n")
+    print http_data_list
+    http_data = dict(s.split(":") for s in http_data_list)
     print http_data
     try:
         #insert back the : and separate each header to its own line
         for key, value in http_data.iteritems():
             fd.write(key + ": " + value)
     except IOError as err:
-        print err
+        print str(err)
         return False
     return True
 
