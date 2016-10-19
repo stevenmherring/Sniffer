@@ -27,17 +27,17 @@ packet_number = 0
 WINDOWS_NAME = "nt"
 
 def usage ():
-    print "Packet Sniffer & Parser by %s." % authors
-    print usecase
-    print "Version: %s" % version
+    print ("Packet Sniffer & Parser by %s." % authors)
+    print (usecase)
+    print ("Version: %s" % version)
     print
-    print "Usage: sniffer.py -o outfile -t time [-rhs:d:]"
-    print "-o outfile   - Dump file for packets. Default dump.log"
-    print "-t time      - Time to parse in s. Default 10s"
-    print "-r           - Reconstruct HTTP and DNS packets"
-    print "-h           - Print usage"
-    print "-d device    - **UNSUPPORTED** Define device to sniff, default is en0"
-    print "-s term      - Search outfile for term or regex"
+    print ("Usage: sniffer.py -o outfile -t time [-rhs:d:]")
+    print ("-o outfile   - Dump file for packets. Default dump.log")
+    print ("-t time      - Time to parse in s. Default 10s")
+    print ("-r           - Reconstruct HTTP and DNS packets")
+    print ("-h           - Print usage")
+    print ("-d device    - **UNSUPPORTED** Define device to sniff, default is en0")
+    print ("-s term      - Search outfile for term or regex")
     sys.exit(0)
 
 def main():
@@ -54,7 +54,7 @@ def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:],"o:t:s:rhd:",["output","time","search","reconstruct","help","device"])
     except getopt.GetoptError as err:
-        print str(err)
+        print( str(err) );
         usage()
 
     for o,a in opts:
@@ -69,15 +69,15 @@ def main():
         elif o in ("-s", "--search"):
             search = a
         elif o in ("-d", "--device"):
-            print "Device support not implemented"
+            print ("Device support not implemented")
             break
             devices = pcapy.findalldevs()
             if a in devices:
                 device = a
             else:
-                print "Device not available. Available devices are..."
+                print ("Device not available. Available devices are...")
                 for d in devices:
-                    print d
+                    print (d)
                 sys.exit(0)
 
     try:
@@ -100,25 +100,25 @@ def main():
         if os.name == WINDOWS_NAME:
             sniffSocket.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
     except socket.error as err:
-        print err_socket_failure
-        print str(err)
+        print (err_socket_failure)
+        print (str(err))
         sys.exit(0)
 
     try:
         f = open(outfile)
     except IOError as err:
-        print err_fopen_failure
-        print str(err)
+        print (err_fopen_failure)
+        print (str(err))
         sys.exit(0)
     stoptime = time.time() + period
     while True:
-        if time.time() > stoptime # if we ran past provided time
+        if time.time() > stoptime: # if we ran past provided time
             break
         packet = sniffSocket.recvfrom(65565) #receive packet
         packet = packet[0] #pull packet from tuple
         if(parseTools.init_packet_parse(packet, f) == False):
             #we returned false through an error, break and terminate gracefully
-            print err_parsing
+            print (err_parsing)
             break
     #if windows, disable promiscuous
     if os.name == WINDOWS_NAME:
@@ -126,7 +126,7 @@ def main():
     try:
         f.close()
     except IOError as err:
-        print str(err)
+        print (str(err))
     sys.exit(0)
 
 
