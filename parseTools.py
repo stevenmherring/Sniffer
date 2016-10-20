@@ -194,10 +194,13 @@ def parse_http(packet, data, fd):
     #split raw http by :
     http_data_list = data.split("\r\n")
     print (http_data_list)
+    req = http_data_list[0]
+    http_data_list = http_data_list[1:] #truncate request line ie. GET /HTTP1.1
     http_data = dict(s.split(":") for s in http_data_list)
-    print (http_data)
+    print (req + "\n" + http_data)
     try:
         #insert back the : and separate each header to its own line
+        fd.write(req + "\n")
         for key, value in http_data.iteritems():
             fd.write(key + ": " + value)
     except IOError as err:
