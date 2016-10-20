@@ -58,16 +58,15 @@ def parse_ip_packet(packet, ethernet_length, fd):
     ttl = ipheader[5]
     protocol = ipheader[6]
 
-    packet_number = 0 #Temporary to avoid errors
-
     src_address = socket.inet_ntoa(ipheader[8])
     dest_address = socket.inet_ntoa(ipheader[9])
-    out_data = "Packet Number: " + packet_number + " Version: " + str(version) 
+    out_data = "Version: " + str(version)
     + " IHL: " + str(ihl) + " TTL: " + str(ttl) + " Protocol: " + str(protocol)
     + " Source Address: " + str(src_address) + " Destination Address: " + str(dst_address)
-    
+
     #packet_number++ Gives me an error in python 3 for some reason - Himanshu
-    packet_number = packet_number + 1
+    #packet_number = packet_number + 1
+    #handled packet number tracking in sniffer.py - parseTools shouldnt care about number
 
     print (out_data)
     try:
