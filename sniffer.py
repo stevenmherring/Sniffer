@@ -9,17 +9,19 @@ import pcapy
 
 #dev info
 version = "0.0.1"
-authors = "Steven Herring, Thomas Karnati, Himanshu Kattelu"
+authors = "Steven Herring, Himanshu Kattelu"
 usecase = "Sniff, log, parse and search packets during a given period of time"
 
 #string usage
 err_socket_failure = "Failure to create or use socket"
 err_fopen_failure = "Failed to open file"
 err_parsing = "Parsing Failure Please refer to STDOUT/STDERR"
+err_search = "Search Function Failure"
 
 #globals
 reconstruct = False
 outfile = "dump.log"
+tempfile = "temp.log"
 search = ""
 period = 10
 device = "" #remove, we can just sniff everything
@@ -104,6 +106,13 @@ def main():
         print (str(err))
         sys.exit(0)
 
+    #clean up files from possible previous parse.
+    #not catching errors, don't care if files dont exist for now
+    os.remove(dump)
+    os.remove(dump + ".bak")
+    os.remove(temp)
+
+    #open dump file
     try:
         f = open(outfile)
     except IOError as err:
@@ -111,6 +120,7 @@ def main():
         print (str(err))
         sys.exit(0)
     stoptime = time.time() + period
+    #BEGIN PACKET PARSE
     while True:
         if time.time() > stoptime: # if we ran past provided time
             break
@@ -119,13 +129,43 @@ def main():
         print("Packet Number: " + packet_number)
         f.write("Packet Number: " + packet_number)
         packet_number += 1
-        if(parseTools.init_packet_parse(packet, f) == False):
+        if(parseTools.initPacketParse(packet, f) == False):
             #we returned false through an error, break and terminate gracefully
             print (err_parsing)
             break
+    #END PACKET PARSE
     #if windows, disable promiscuous
     if os.name == WINDOWS_NAME:
         sniffSocket.ioctl(socket.SIO_RCVALL, socket.RCVALL_OFF)
+    #if reconstruct option select
+    if reconstruct:
+        #go through parsed packets, combine packets.
+        if(parseTools.reconstructPackets(temp) == False):
+            print (err_reconstruct)
+        else:
+            #when done, move original parse to .bak location
+            #move reconstructed packets to dump
+            try:
+                os.rename(dump, dump + ".bak")
+            except OSError as err:
+                print(str(err))
+            try:
+                os.rename(temp, dump)
+            except OSError as err:
+                print(str(err))
+
+
+    #if search selected
+    if search != "":
+        search_file = dump
+        #if we reconstructed, original dump will be at dump.log.bak
+        if reconstruct:
+            search_file = dump + ".bak"
+        #search by packet for REGEX...packets tracked by "Packet Number: " + packet_number
+        if(searchTools.searchPackets(search_file, search) == False):
+            print (err_search)
+            break
+    #end program sequence
     try:
         f.close()
     except IOError as err:

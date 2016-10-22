@@ -11,7 +11,7 @@ def ethernet_address(arg):
   ret = "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x" % (ord(arg[0]) , ord(arg[1]) , ord(arg[2]), ord(arg[3]), ord(arg[4]) , ord(arg[5]))
   return ret
 
-def init_packet_parse(packet, fd):
+def initPacketParse(packet, fd):
     #parse & unpack header, addresses from packet
     ethernet_header = packet[:ETHERNET_LENGTH]
     ethernet = unpack("!6s6sH" , ethernet_header) #splits into 6 char string, 6 char string, 2byte int
@@ -27,7 +27,7 @@ def init_packet_parse(packet, fd):
     else:
         print ("uhhhh not here yet")
     return True
-def parse_ip_packet(packet, ethernet_length, fd):
+def parseIpPacket(packet, ethernet_length, fd):
     #parse header
     ipheader = packet[ethernet_length:ethernet_length+20] #extract 20 byte IP header
     #IP Header as defined by RFC noted with unpacked location [i]
@@ -86,7 +86,7 @@ def parse_ip_packet(packet, ethernet_length, fd):
         return False #other packet types
     return True
 
-def parse_tcp(packet, ipheader_length, fd):
+def parseTcp(packet, ipheader_length, fd):
     #parse header
     start = ipheader_length + ETHERNET_LENGTH
     header = packet[start:start+20] #extract 20 byte tcp header
@@ -147,7 +147,7 @@ def parse_tcp(packet, ipheader_length, fd):
             return False
     return True
 
-def parse_udp(packet, ipheader_length, fd):
+def parseUdp(packet, ipheader_length, fd):
     start = ipheader_length + ETHERNET_LENGTH
     header = packet[start:start+8] #extract 8 byte udp header
     #UDP header as defined by RFC 791
@@ -190,7 +190,7 @@ def parse_udp(packet, ipheader_length, fd):
         return False
     return True
 
-def parse_http(packet, data, fd):
+def parseHttp(packet, data, fd):
     #split raw http by :
     http_data_list = data.split("\r\n")
     print (http_data_list)
@@ -208,5 +208,14 @@ def parse_http(packet, data, fd):
         return False
     return True
 
-def parse_dns(packet, data, fd):
+def parseDns(packet, data, fd):
+    return True
+
+def reconstructPackets(file):
+    try:
+        temp = open(tempfile)
+    except IOError as err:
+        print(str(err))
+        return False
+    #do some parsing here....    
     return True
