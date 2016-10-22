@@ -126,8 +126,8 @@ def main():
             break
         packet = sniffSocket.recvfrom(65565) #receive packet
         packet = packet[0] #pull packet from tuple
-        print(packetID + packet_number)
-        f.write(packetID + packet_number)
+        print(packetID + str(packet_number))
+        f.write(packetID + str(packet_number))
         packet_number += 1
         if(parseTools.initPacketParse(packet, f) == False):
             #we returned false through an error, break and terminate gracefully

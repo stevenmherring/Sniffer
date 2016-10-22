@@ -18,8 +18,8 @@ def initPacketParse(packet, fd):
     ethernet = unpack("!6s6sH" , ethernet_header) #splits into 6 char string, 6 char string, 2byte int
     ethernet_protocol = socket.ntohs(ethernet[2]) #last element is out protocol ID
     print ("Dest MAC address: " + ethernet_address(packet[0:6]) +
-           "Source MAC address: " + ethernet_address(packet[6:12]) +
-           " Protocol type: " + str(ethernet_protocol))
+           "\nSource MAC address: " + ethernet_address(packet[6:12]) +
+           "\nProtocol type: " + str(ethernet_protocol))
 
     #Parse packets by type, IP first, what we really are looking for
     if ethernet_protocol == IP_PACKET_ID:
@@ -61,9 +61,9 @@ def parseIpPacket(packet, ethernet_length, fd):
 
     src_address = socket.inet_ntoa(ipheader[8])
     dest_address = socket.inet_ntoa(ipheader[9])
-    out_data = "Version: " + str(version)
+    out_data = ("Version: " + str(version)
     + " IHL: " + str(ihl) + " TTL: " + str(ttl) + " Protocol: " + str(protocol)
-    + " Source Address: " + str(src_address) + " Destination Address: " + str(dst_address)
+    + " Source Address: " + str(src_address) + " Destination Address: " + str(dest_address))
 
     #packet_number++ Gives me an error in python 3 for some reason - Himanshu
     #packet_number = packet_number + 1
@@ -121,7 +121,7 @@ def parseTcp(packet, ipheader_length, fd):
     out_data = ("Source Port: " + str(src_port)
     + " Destination Port: " + str(dest_port) + " Sequence Number: "
     + str(seq_number) + " Acknowledgment Number: " + str(ack_number)
-    + " TCP Length: " + strheader_length)
+    + " TCP Length: " + str(header_length))
     print (out_data)
     try:
         fd.write(out_data)
@@ -135,7 +135,7 @@ def parseTcp(packet, ipheader_length, fd):
     #Look for "HTTP/1.x" for HTTP
     #content-length: field will give the total size of the packet. (useful but not necessary)
     #Refere to RFC 2616 for reconstruction of HTTP
-    out_data = pack[header_size:]
+    out_data = str(packet[header_size:])
     if "HTTP/1." in out_data: #this condition isn't good enough to use, needs to be more exclusive
         if(parseHttp(packet, out_data, fd) == False):
             return False
@@ -166,7 +166,7 @@ def parseUdp(packet, ipheader_length, fd):
     header = unpack("!HHHH", header)
     src_port = header[0]
     dest_port = header[1]
-    length = header[2]
+    header_length = header[2]
     checksum = header[3]
     #print and write packet details
     out_data = ("Source Port: " + str(src_port) + " Destination Port: "
@@ -182,7 +182,7 @@ def parseUdp(packet, ipheader_length, fd):
     #need to check if packet contains DNS data
     #RFC Reference TBD
     #print and write packet data
-    out_data = pack[header_size:]
+    out_data = str(packet[header_size:])
     print (" Data: " + out_data)
     try:
         fd.write(out_data)
