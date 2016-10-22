@@ -27,6 +27,7 @@ period = 10
 device = "" #remove, we can just sniff everything
 packet_number = 0
 WINDOWS_NAME = "nt"
+packetID = "Packet Number: "
 
 def usage ():
     print ("Packet Sniffer & Parser by %s." % authors)
@@ -126,8 +127,8 @@ def main():
             break
         packet = sniffSocket.recvfrom(65565) #receive packet
         packet = packet[0] #pull packet from tuple
-        print("Packet Number: " + packet_number)
-        f.write("Packet Number: " + packet_number)
+        print(packetID + packet_number)
+        f.write(packetID + packet_number)
         packet_number += 1
         if(parseTools.initPacketParse(packet, f) == False):
             #we returned false through an error, break and terminate gracefully
@@ -162,7 +163,7 @@ def main():
         if reconstruct:
             search_file = dump + ".bak"
         #search by packet for REGEX...packets tracked by "Packet Number: " + packet_number
-        if(searchTools.searchPackets(search_file, search) == False):
+        if(searchTools.searchPackets(search_file, search, packetID) == False):
             print (err_search)
             break
     #end program sequence
