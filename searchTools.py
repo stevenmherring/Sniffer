@@ -3,7 +3,7 @@ writePacket = False #flag
 def searchPackets(infile, term, packetID):
     idlength = len(packetID)
     try:
-        outfile = open(results)
+        outfile = open(results, "w")
     except IOError as err:
         print (str(err))
         returun False

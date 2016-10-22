@@ -56,8 +56,8 @@ def main():
     global search
     global period
 
-    if not len(sys.argv[1:]): # if no arguments, we're not doing anything
-        usage()
+    #if not len(sys.argv[1:]): # if no arguments, we're not doing anything
+    #    usage()
 
     try:
         opts, args = getopt.getopt(sys.argv[1:],"o:t:s:rh",["output","time","search","reconstruct","help"])
@@ -92,7 +92,7 @@ def main():
         #bind bind all sockets
         sniffSocket.bind(("",0))
         #include IP headers, unsure if necessary ATM
-        sniffSocket.setsockopt(socket.IPPOTO_IP, socket.IP_HDRINCL, 1)
+        #sniffSocket.setsockopt(socket.IPPOTO_IP, socket.IP_HDRINCL, 1)
         #if windows, enable promiscuous
         if os.name == WINDOWS_NAME:
             sniffSocket.ioctl(socket.SIO_RCVALL, socket.RCVALL_ON)
@@ -105,18 +105,20 @@ def main():
     #not catching errors, don't care if files dont exist for now
     deleteFile(outfile)
     deleteFile(outfile + ".bak")
-    deleteFile(temp)
+    deleteFile(tempfile)
 
     #open dump file
     try:
-        f = open(outfile)
+        f = open(outfile, "w")
     except IOError as err:
         print (err_fopen_failure)
         print (str(err))
         sys.exit(0)
     stoptime = time.time() + period
+    print (stoptime)
     #BEGIN PACKET PARSE
     while True:
+        print (time.time())
         if time.time() > stoptime: # if we ran past provided time
             break
         packet = sniffSocket.recvfrom(65565) #receive packet
@@ -135,7 +137,7 @@ def main():
     #if reconstruct option select
     if reconstruct:
         #go through parsed packets, combine packets.
-        if(parseTools.reconstructPackets(temp) == False):
+        if(parseTools.reconstructPackets(tempfile) == False):
             print (err_reconstruct)
         else:
             #when done, move original parse to .bak location
@@ -145,7 +147,7 @@ def main():
             except OSError as err:
                 print(str(err))
             try:
-                os.rename(temp, outfile)
+                os.rename(tempfile, outfile)
             except OSError as err:
                 print(str(err))
 

@@ -211,11 +211,11 @@ def parseHttp(packet, data, fd):
 def parseDns(packet, data, fd):
     return True
 
-def reconstructPackets(file):
+def reconstructPackets(filename):
     try:
-        temp = open(tempfile)
+        temp = open(filename, "w")
     except IOError as err:
         print(str(err))
         return False
-    #do some parsing here....    
+    #do some parsing here....
     return True
