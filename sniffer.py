@@ -1,6 +1,7 @@
 import sys
 import socket
 import os
+import errno
 import getopt
 import parseTools
 from struct import *
@@ -40,6 +41,13 @@ def usage ():
     print ("-h           - Print usage")
     print ("-s term      - Search outfile for term or regex")
     sys.exit(0)
+
+def deleteFile(filename):
+    try:
+        os.remove(filename)
+    except OSError as err:
+        if err.errno != errno.ENOENT:
+            raise
 
 def main():
     # global copies
@@ -95,9 +103,9 @@ def main():
 
     #clean up files from possible previous parse.
     #not catching errors, don't care if files dont exist for now
-    os.remove(dump)
-    os.remove(dump + ".bak")
-    os.remove(temp)
+    deleteFile(outfile)
+    deleteFile(outfile + ".bak")
+    deleteFile(temp)
 
     #open dump file
     try:
@@ -133,25 +141,24 @@ def main():
             #when done, move original parse to .bak location
             #move reconstructed packets to dump
             try:
-                os.rename(dump, dump + ".bak")
+                os.rename(outfile, outfile + ".bak")
             except OSError as err:
                 print(str(err))
             try:
-                os.rename(temp, dump)
+                os.rename(temp, outfile)
             except OSError as err:
                 print(str(err))
 
 
     #if search selected
     if search != "":
-        search_file = dump
+        search_file = outfile
         #if we reconstructed, original dump will be at dump.log.bak
         if reconstruct:
-            search_file = dump + ".bak"
+            search_file = outfile + ".bak"
         #search by packet for REGEX...packets tracked by "Packet Number: " + packet_number
         if(searchTools.searchPackets(search_file, search, packet) == False):
             print (err_search)
-            break
     #end program sequence
     try:
         f.close()
