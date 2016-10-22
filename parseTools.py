@@ -1,4 +1,5 @@
 from struct import *
+import socket
 #ID reference
 IP_PACKET_ID = 8
 TCP_PROTOCOL_ID = 6
@@ -7,22 +8,22 @@ UDP_PROTOCOL_ID = 17
 #Static Packet Lengths
 ETHERNET_LENGTH = 14
 
-def ethernet_address(arg):
-  ret = "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x" % (ord(arg[0]) , ord(arg[1]) , ord(arg[2]), ord(arg[3]), ord(arg[4]) , ord(arg[5]))
-  return ret
+def ethernet_address (a) :
+  b = "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x" % (a[0] , a[1] , a[2], a[3], a[4] , a[5])
+  return b
 
 def initPacketParse(packet, fd):
     #parse & unpack header, addresses from packet
     ethernet_header = packet[:ETHERNET_LENGTH]
     ethernet = unpack("!6s6sH" , ethernet_header) #splits into 6 char string, 6 char string, 2byte int
-    ethernet_protocol = sniffSocket.ntohs(ethernet[2]) #last element is out protocol ID
+    ethernet_protocol = socket.ntohs(ethernet[2]) #last element is out protocol ID
     print ("Dest MAC address: " + ethernet_address(packet[0:6]) +
            "Source MAC address: " + ethernet_address(packet[6:12]) +
            " Protocol type: " + str(ethernet_protocol))
 
     #Parse packets by type, IP first, what we really are looking for
     if ethernet_protocol == IP_PACKET_ID:
-        if(parse_ip_packet(packet, ETHERNET_LENGTH, fd) == False):
+        if(parseIpPacket(packet, ETHERNET_LENGTH, fd) == False):
             return False
     else:
         print ("uhhhh not here yet")
@@ -77,10 +78,10 @@ def parseIpPacket(packet, ethernet_length, fd):
     ipheader_length = ihl * 4
     #check if tcp/udp/http/dns
     if protocol == TCP_PROTOCOL_ID:
-        if(parse_tcp(packet, ipheader_length, fd) == False):
+        if(parseTcp(packet, ipheader_length, fd) == False):
             return False
     elif protocol == UDP_PROTOCOL_ID:
-        if(parse_udp(packet, ipheader_length, fd) == False):
+        if(parseUdp(packet, ipheader_length, fd) == False):
             return False
     else:
         return False #other packet types
@@ -136,7 +137,7 @@ def parseTcp(packet, ipheader_length, fd):
     #Refere to RFC 2616 for reconstruction of HTTP
     out_data = pack[header_size:]
     if "HTTP/1." in out_data: #this condition isn't good enough to use, needs to be more exclusive
-        if(parse_http(packet, out_data, fd) == False):
+        if(parseHttp(packet, out_data, fd) == False):
             return False
     else:
         print (" Data: " + out_data)

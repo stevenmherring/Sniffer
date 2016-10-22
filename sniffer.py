@@ -55,6 +55,8 @@ def main():
     global outfile
     global search
     global period
+    global tempfile
+    global packet_number
 
     #if not len(sys.argv[1:]): # if no arguments, we're not doing anything
     #    usage()
@@ -83,14 +85,14 @@ def main():
         if os.name == WINDOWS_NAME:
             socket_protocol = socket.IPPROTO_IP
         else:
-            socket_protocol = socket.IPPROTO_ICMP
+            socket_protocol = socket.ntohs(0x0003)
         #still unsure if this is the correct socket configuration, as I can't test yet
         #need to get some time to a windows/linux box to test everything, but my research suggests
         #this is correct.
-        #sniffSocket = socket.socket(socket.AF_PACKET , socket.SOCK_RAW , socket.ntohs(0x0003))
-        sniffSocket = socket.socket(socket.AF_INET , socket.SOCK_RAW , socket_protocol)
+        #sniffSocket = socket.socket(socket.AF_INET , socket.SOCK_RAW , socket_protocol)
+        sniffSocket = socket.socket(socket.AF_PACKET, socket.SOCK_RAW , socket_protocol)
         #bind bind all sockets
-        sniffSocket.bind(("",0))
+        #sniffSocket.bind(("",0))
         #include IP headers, unsure if necessary ATM
         #sniffSocket.setsockopt(socket.IPPOTO_IP, socket.IP_HDRINCL, 1)
         #if windows, enable promiscuous
@@ -116,6 +118,7 @@ def main():
         sys.exit(0)
     stoptime = time.time() + period
     print (stoptime)
+    #TODO perhaps spawn new thread to manage time, as program will wait sniffing
     #BEGIN PACKET PARSE
     while True:
         print (time.time())
