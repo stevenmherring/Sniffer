@@ -5,11 +5,10 @@ import getopt
 import parseTools
 from struct import *
 import time
-import pcapy
 
 #dev info
 version = "0.0.1"
-authors = "Steven Herring, Himanshu Kattelu"
+authors = "Steven Herring, Thomas Karnati, Himanshu Kattelu"
 usecase = "Sniff, log, parse and search packets during a given period of time"
 
 #string usage
@@ -34,12 +33,11 @@ def usage ():
     print (usecase)
     print ("Version: %s" % version)
     print
-    print ("Usage: sniffer.py -o outfile -t time [-rhs:d:]")
+    print ("Usage: sniffer.py -o outfile -t time [-rhs:]")
     print ("-o outfile   - Dump file for packets. Default dump.log")
     print ("-t time      - Time to parse in s. Default 10s")
     print ("-r           - Reconstruct HTTP and DNS packets")
     print ("-h           - Print usage")
-    print ("-d device    - **UNSUPPORTED** Define device to sniff, default is en0")
     print ("-s term      - Search outfile for term or regex")
     sys.exit(0)
 
@@ -49,13 +47,12 @@ def main():
     global outfile
     global search
     global period
-    global device
 
     if not len(sys.argv[1:]): # if no arguments, we're not doing anything
         usage()
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:],"o:t:s:rhd:",["output","time","search","reconstruct","help","device"])
+        opts, args = getopt.getopt(sys.argv[1:],"o:t:s:rh",["output","time","search","reconstruct","help"])
     except getopt.GetoptError as err:
         print( str(err) );
         usage()
@@ -71,17 +68,6 @@ def main():
             period = a
         elif o in ("-s", "--search"):
             search = a
-        elif o in ("-d", "--device"):
-            print ("Device support not implemented")
-            break
-            devices = pcapy.findalldevs()
-            if a in devices:
-                device = a
-            else:
-                print ("Device not available. Available devices are...")
-                for d in devices:
-                    print (d)
-                sys.exit(0)
 
     try:
         #s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP)
@@ -163,7 +149,7 @@ def main():
         if reconstruct:
             search_file = dump + ".bak"
         #search by packet for REGEX...packets tracked by "Packet Number: " + packet_number
-        if(searchTools.searchPackets(search_file, search, packetID) == False):
+        if(searchTools.searchPackets(search_file, search, packet) == False):
             print (err_search)
             break
     #end program sequence
