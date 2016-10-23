@@ -19,7 +19,7 @@ def initPacketParse(packet, fd):
     ethernet_protocol = socket.ntohs(ethernet[2]) #last element is out protocol ID
     print ("Dest MAC address: " + ethernet_address(packet[0:6]) +
            "\nSource MAC address: " + ethernet_address(packet[6:12]) +
-           "\nProtocol type: " + str(ethernet_protocol))
+           "\nProtocol type: " + str(ethernet_protocol) + "\n")
 
     #Parse packets by type, IP first, what we really are looking for
     if ethernet_protocol == IP_PACKET_ID:
@@ -63,7 +63,7 @@ def parseIpPacket(packet, ethernet_length, fd):
     dest_address = socket.inet_ntoa(ipheader[9])
     out_data = ("Version: " + str(version)
     + " IHL: " + str(ihl) + " TTL: " + str(ttl) + " Protocol: " + str(protocol)
-    + " Source Address: " + str(src_address) + " Destination Address: " + str(dest_address))
+    + " Source Address: " + str(src_address) + " Destination Address: " + str(dest_address) + "\n")
 
     #packet_number++ Gives me an error in python 3 for some reason - Himanshu
     #packet_number = packet_number + 1
@@ -121,7 +121,7 @@ def parseTcp(packet, ipheader_length, fd):
     out_data = ("Source Port: " + str(src_port)
     + " Destination Port: " + str(dest_port) + " Sequence Number: "
     + str(seq_number) + " Acknowledgment Number: " + str(ack_number)
-    + " TCP Length: " + str(header_length))
+    + " TCP Length: " + str(header_length) + "\n")
     print (out_data)
     try:
         fd.write(out_data)
@@ -140,7 +140,7 @@ def parseTcp(packet, ipheader_length, fd):
         if(parseHttp(packet, out_data, fd) == False):
             return False
     else:
-        print (" Data: " + out_data)
+        print (" Data: " + out_data + "\n")
         try:
             fd.write(out_data)
         except IOError as err:
@@ -170,7 +170,7 @@ def parseUdp(packet, ipheader_length, fd):
     checksum = header[3]
     #print and write packet details
     out_data = ("Source Port: " + str(src_port) + " Destination Port: "
-     + str(dest_port) + " Length: " + str(header_length) + " Checksum: " + str(checksum))
+     + str(dest_port) + " Length: " + str(header_length) + " Checksum: " + str(checksum) + "\n")
     print (out_data)
     try:
         fd.write(out_data)
@@ -203,7 +203,7 @@ def parseHttp(packet, data, fd):
         #insert back the : and separate each header to its own line
         fd.write(req + "\n")
         for key, value in http_data.iteritems():
-            fd.write(key + ": " + value)
+            fd.write(key + ": " + value + "\n")
     except IOError as err:
         print (str(err))
         return False

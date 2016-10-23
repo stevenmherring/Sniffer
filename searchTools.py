@@ -17,7 +17,7 @@ def searchPackets(infile, term, packetID):
                     #check if former packet held search term
                     if writePacket == True:
                         try:
-                            outfile.write(currentPacket)
+                            outfile.write(currentPacket + "\n")
                         except IOError as err:
                             print (str(err))
                     #start recording next packet

@@ -75,7 +75,7 @@ def main():
         elif o in ("-o", "--output"):
             outfile = a
         elif o in ("-t", "--time"):
-            period = a
+            period = float(a)
         elif o in ("-s", "--search"):
             search = a
 
@@ -126,8 +126,8 @@ def main():
             break
         packet = sniffSocket.recvfrom(65565) #receive packet
         packet = packet[0] #pull packet from tuple
-        print(packetID + str(packet_number))
-        f.write(packetID + str(packet_number))
+        print(packetID + str(packet_number) + "\n")
+        f.write(packetID + str(packet_number) + "\n")
         packet_number += 1
         if(parseTools.initPacketParse(packet, f) == False):
             #we returned false through an error, break and terminate gracefully
