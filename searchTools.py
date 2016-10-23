@@ -6,7 +6,7 @@ def searchPackets(infile, term, packetID):
         outfile = open(results, "w")
     except IOError as err:
         print (str(err))
-        returun False
+        return False
     try:
         with open(infile) as f:
             currentPacket = ""
