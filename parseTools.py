@@ -193,16 +193,21 @@ def parseUdp(packet, ipheader_length, fd):
 
 def parseHttp(packet, data, fd):
     #split raw http by :
-    http_data_list = data.split("\r\n")
+    http_data_list = data.split('\\r\\n')
     print (http_data_list)
     req = http_data_list[0]
-    http_data_list = http_data_list[1:] #truncate request line ie. GET /HTTP1.1
-    http_data = dict(s.split(":") for s in http_data_list)
-    print (req + "\n" + http_data)
+    http_data_list = http_data_list[1:len(http_data_list) - 1] #truncate request line ie. GET /HTTP1.1
+    http_data_list = list(filter(None, http_data_list))
+    print(req)
+    for i in range(0, len(http_data_list)):
+        print(i)
+        print(http_data_list[i])
+    http_data = dict(s.split(":", 1) for s in http_data_list)
+    print (req + "\n" + str(http_data))
     try:
         #insert back the : and separate each header to its own line
         fd.write(req + "\n")
-        for key, value in http_data.iteritems():
+        for key, value in http_data.items():
             fd.write(key + ": " + value + "\n")
     except IOError as err:
         print (str(err))
