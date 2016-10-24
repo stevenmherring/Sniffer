@@ -24,7 +24,7 @@ def searchPackets(infile, term, packetID):
                     currentPacket = line
                     #set flag back to flase
                     writePacket = False
-                elif term in line:
+                elif bool(re.search(term, line)):
                     #packet has search term, mark as such
                     writePacket = True
                     currentPacket = currentPacket + "\n" + line #append line onto currentPacket
