@@ -16,7 +16,7 @@ def initPacketParse(packet, fd):
     #parse & unpack header, addresses from packet
     ethernet_header = packet[:ETHERNET_LENGTH]
     ethernet = unpack("!6s6sH" , ethernet_header) #splits into 6 char string, 6 char string, 2byte int
-    ethernet_protocol = socket.ntohs(ethernet[2]) #last element is out protocol ID
+    ethernet_protocol = socket.ntohs(ethernet[2]) #convert network int to host int, pull protocol #
     print ("Dest MAC address: " + ethernet_address(packet[0:6]) +
            "\nSource MAC address: " + ethernet_address(packet[6:12]) +
            "\nProtocol type: " + str(ethernet_protocol) + "\n")
@@ -26,7 +26,7 @@ def initPacketParse(packet, fd):
         if(parseIpPacket(packet, ETHERNET_LENGTH, fd) == False):
             return False
     else:
-        print ("uhhhh not here yet")
+        print ("We don't care about these non-IP packets yet.")
     return True
 def parseIpPacket(packet, ethernet_length, fd):
     #parse header
