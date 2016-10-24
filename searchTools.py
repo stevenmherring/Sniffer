@@ -1,6 +1,5 @@
 import re
 results = "search_results.log" #out log for search packets
-writePacket = False #flag
 #read the dump line by line, recreating each individual packet by the
 #Packet Number:
 #if any line contains the regex/term, set a flag
@@ -13,8 +12,8 @@ def searchPackets(infile, term, packetID):
         print (str(err))
         return False
     try:
+        currentPacket = ""
         with open(infile) as f:
-            currentPacket = ""
             for line in f:
                 checkLine = packetID[:idlength]
                 if packetID == checkLine:
@@ -29,6 +28,12 @@ def searchPackets(infile, term, packetID):
                     currentPacket = line
                 else:
                     currentPacket = currentPacket + "\n" + line #append line onto currentPacket
+        #check the last packet
+        if bool(re.search(term, currentPacket)):
+            try:
+                outfile.write(currentPacket + "\n")
+            except IOError as err:
+                print (str(err))
     except IOError as err:
         print (str(err))
         try:
