@@ -15,7 +15,7 @@ def searchPackets(infile, term, packetID):
         currentPacket = ""
         with open(infile) as f:
             for line in f:
-                checkLine = packetID[:idlength]
+                checkLine = line[:idlength]
                 if packetID == checkLine:
                     #start of a new packet
                     #check if former packet held search term

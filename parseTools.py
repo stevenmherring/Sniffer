@@ -136,7 +136,7 @@ def parseTcp(packet, ipheader_length, fd):
     #content-length: field will give the total size of the packet. (useful but not necessary)
     #Refere to RFC 2616 for reconstruction of HTTP
     out_data = str(packet[header_size:])
-    if "HTTP/1." in out_data: #this condition isn't good enough to use, needs to be more exclusive
+    if "HTTP/1." in out_data: #this condition isn't good enough to use, needs to check DEST PORT == HTTP
         if(parseHttp(packet, out_data, fd) == False):
             return False
     else:
