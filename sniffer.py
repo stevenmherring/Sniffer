@@ -10,7 +10,7 @@ import time
 
 #dev info
 version = "0.0.1"
-authors = "Steven Herring, Thomas Karnati, Himanshu Kattelu"
+authors = "Steven Herring"
 usecase = "Sniff, log, parse and search packets during a given period of time"
 
 #string usage
